@@ -1,0 +1,6 @@
+pillow
+pandas
+openpyxl
+rapidocr-onnxruntime
+numpy
+streamlit>=1.51.0

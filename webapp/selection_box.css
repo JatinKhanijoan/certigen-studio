@@ -1,0 +1,145 @@
+.certigen-selection-root {
+  --accent: #38bdf8;
+  --accent-strong: #0284c7;
+  --surface: #111827;
+  --surface-raised: #182131;
+  --border: #334155;
+  --text: #e5eef8;
+  --muted: #94a3b8;
+  color: var(--text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  height: 100%;
+}
+
+.certigen-editor-shell {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #0b1120;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.22);
+}
+
+.certigen-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  padding: 7px 10px 7px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.certigen-toolbar-copy { min-width: 0; }
+.certigen-toolbar-title { font-size: 13px; font-weight: 650; }
+.certigen-toolbar-help { color: var(--muted); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.certigen-toolbar-actions { display: flex; align-items: center; gap: 5px; flex: 0 0 auto; }
+
+.certigen-icon-button {
+  display: inline-grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  background: var(--surface-raised);
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+}
+
+.certigen-icon-button:hover { border-color: #64748b; background: #223047; }
+.certigen-icon-button:focus-visible { outline: 3px solid rgba(56, 189, 248, .38); outline-offset: 2px; }
+.certigen-icon-button svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
+.certigen-zoom-label { min-width: 42px; color: var(--muted); font-size: 11px; text-align: center; }
+
+.certigen-viewport {
+  position: relative;
+  overflow: auto;
+  max-height: 650px;
+  padding: 18px;
+  background-color: #07101e;
+  background-image: linear-gradient(45deg, #0b1626 25%, transparent 25%), linear-gradient(-45deg, #0b1626 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #0b1626 75%), linear-gradient(-45deg, transparent 75%, #0b1626 75%);
+  background-size: 24px 24px;
+  background-position: 0 0, 0 12px, 12px -12px, -12px 0;
+}
+
+.certigen-stage {
+  position: relative;
+  margin: 0 auto;
+  transform-origin: top left;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, .34);
+  user-select: none;
+}
+
+.certigen-stage-image { display: block; width: 100%; height: 100%; pointer-events: none; }
+.certigen-guide { position: absolute; z-index: 4; display: none; pointer-events: none; background: #f43f5e; box-shadow: 0 0 0 1px rgba(255,255,255,.7); }
+.certigen-guide.is-visible { display: block; }
+.certigen-guide-x { top: 0; bottom: 0; left: 50%; width: 1px; }
+.certigen-guide-y { left: 0; right: 0; top: 50%; height: 1px; }
+
+.certigen-selection {
+  position: absolute;
+  z-index: 5;
+  box-sizing: border-box;
+  border: 2px solid var(--accent);
+  background: rgba(56, 189, 248, .06);
+  cursor: move;
+  touch-action: none;
+}
+
+.certigen-selection:focus-visible { outline: 3px solid rgba(56, 189, 248, .38); outline-offset: 4px; }
+.certigen-live-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  white-space: nowrap;
+  pointer-events: none;
+  line-height: 1;
+  text-rendering: geometricPrecision;
+}
+
+.certigen-handle {
+  position: absolute;
+  z-index: 7;
+  width: 12px;
+  height: 12px;
+  box-sizing: border-box;
+  border: 2px solid #fff;
+  border-radius: 3px;
+  background: var(--accent-strong);
+  box-shadow: 0 1px 5px rgba(0,0,0,.45);
+}
+
+.certigen-handle-nw { left: 0; top: 0; transform: translate(-50%, -50%); cursor: nwse-resize; }
+.certigen-handle-n { left: 50%; top: 0; transform: translate(-50%, -50%); cursor: ns-resize; }
+.certigen-handle-ne { right: 0; top: 0; transform: translate(50%, -50%); cursor: nesw-resize; }
+.certigen-handle-e { right: 0; top: 50%; transform: translate(50%, -50%); cursor: ew-resize; }
+.certigen-handle-se { right: 0; bottom: 0; transform: translate(50%, 50%); cursor: nwse-resize; }
+.certigen-handle-s { left: 50%; bottom: 0; transform: translate(-50%, 50%); cursor: ns-resize; }
+.certigen-handle-sw { left: 0; bottom: 0; transform: translate(-50%, 50%); cursor: nesw-resize; }
+.certigen-handle-w { left: 0; top: 50%; transform: translate(-50%, -50%); cursor: ew-resize; }
+
+.certigen-status {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  background: var(--surface);
+  font-size: 11px;
+}
+
+@media (max-width: 640px) {
+  .certigen-toolbar-help { display: none; }
+  .certigen-viewport { padding: 10px; }
+  .certigen-status { flex-direction: column; gap: 2px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .certigen-icon-button { transition: none; }
+}

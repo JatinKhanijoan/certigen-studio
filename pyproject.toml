@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "certigen"
+version = "1.1.0"
+description = "Automatic certificate generator with OCR-based placeholder detection (no external dependencies)"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Nakul Desai", email = "nakuldesai2006@gmail.com"}
+]
+keywords = ["certificate", "generator", "ocr", "automation", "pdf"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Graphics",
+    "Topic :: Office/Business",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "Pillow>=9.0.0",
+    "pandas>=1.3.0",
+    "numpy>=1.20.0",
+    "openpyxl>=3.0.0",
+    "rapidocr-onnxruntime>=1.3.0",
+]
+
+[project.optional-dependencies]
+cloud = ["boto3>=1.26.0", "google-api-python-client>=2.0.0", "google-auth>=2.0.0"]
+all = ["certigen[cloud]"]
+
+[project.scripts]
+certigen = "certigen.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/bravetiger01/certigen"
+Documentation = "https://github.com/bravetiger01/certigen#readme"
+Repository = "https://github.com/bravetiger01/certigen"
+Issues = "https://github.com/bravetiger01/certigen/issues"
+
+[tool.setuptools.packages.find]
+include = ["certigen*"]
