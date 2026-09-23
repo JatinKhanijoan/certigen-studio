@@ -64,12 +64,12 @@ def _read_csv(upload: Any) -> pd.DataFrame:
         return pd.read_csv(io.BytesIO(upload.getvalue()), encoding="latin-1")
 
 
-def _column_index(columns: list[str], candidates: list[str]) -> int:
+def _column_index(columns: list[str], candidates: list[str], default: int = 0) -> int:
     lowered = {column.strip().lower(): index for index, column in enumerate(columns)}
     for candidate in candidates:
         if candidate in lowered:
             return lowered[candidate]
-    return 0
+    return default
 
 
 def _default_placement(image_size: tuple[int, int]) -> dict[str, int]:
@@ -226,12 +226,12 @@ def _generator(
     return generator
 
 
-def _safe_filename(first_name: str, last_name: str, used: set[str], extension: str) -> str:
+def _safe_filename(name_parts: list[str], used: set[str], extension: str) -> str:
     def clean(value: str) -> str:
         cleaned = re.sub(r"[^A-Za-z0-9]+", "_", str(value).strip())
         return cleaned.strip("_").lower() or "unknown"
 
-    base = f"{clean(first_name)}_{clean(last_name)}"
+    base = "_".join(clean(part) for part in name_parts if str(part).strip()) or "unknown"
     candidate = base
     suffix = 2
     while candidate in used:
@@ -298,7 +298,7 @@ with upload_right:
     names_upload = st.file_uploader(
         "Recipients CSV",
         type=["csv"],
-        help="Use separate first-name and last-name columns.",
+        help="Use two columns (first and last name) or three (first, middle, and last name).",
         key=f"recipients_upload_{st.session_state.get('upload_generation', 0)}",
     )
 
@@ -339,23 +339,37 @@ if names_df.empty or not list(names_df.columns):
     st.stop()
 
 columns = list(names_df.columns)
-mapping_one, mapping_two, format_column = st.columns(3)
-with mapping_one:
-    first_column = st.selectbox("First-name column", columns, index=_column_index(columns, ["first_name", "first name", "firstname"]))
-with mapping_two:
-    last_column = st.selectbox("Last-name column", columns, index=_column_index(columns, ["last_name", "last name", "lastname", "surname"]))
-with format_column:
-    output_format = st.selectbox("Output format", ["PDF", "PNG", "JPEG"])
-
-if first_column == last_column:
-    st.error("Choose different columns for first and last name.")
+if len(columns) not in (2, 3):
+    st.error("The CSV must have exactly two columns (first and last name) or three (first, middle, and last name).")
     st.stop()
 
-recipients = names_df[[first_column, last_column]].copy().dropna(how="all")
-recipients[first_column] = recipients[first_column].fillna("").astype(str).str.strip()
-recipients[last_column] = recipients[last_column].fillna("").astype(str).str.strip()
-recipients = recipients[(recipients[first_column] != "") | (recipients[last_column] != "")]
-recipients["Name"] = (recipients[first_column] + " " + recipients[last_column]).str.replace(r"\s+", " ", regex=True).str.strip()
+mapping_columns = st.columns(4 if len(columns) == 3 else 3)
+with mapping_columns[0]:
+    first_column = st.selectbox("First-name column", columns, index=_column_index(columns, ["first_name", "first name", "firstname"]))
+if len(columns) == 3:
+    with mapping_columns[1]:
+        middle_column = st.selectbox("Middle-name column", columns, index=_column_index(columns, ["middle_name", "middle name", "middlename", "middle"], default=1))
+    last_mapping_column = mapping_columns[2]
+    format_mapping_column = mapping_columns[3]
+else:
+    middle_column = None
+    last_mapping_column = mapping_columns[1]
+    format_mapping_column = mapping_columns[2]
+with last_mapping_column:
+    last_column = st.selectbox("Last-name column", columns, index=_column_index(columns, ["last_name", "last name", "lastname", "surname"], default=len(columns) - 1))
+with format_mapping_column:
+    output_format = st.selectbox("Output format", ["PDF", "PNG", "JPEG"])
+
+selected_name_columns = [first_column, *([middle_column] if middle_column else []), last_column]
+if len(set(selected_name_columns)) != len(selected_name_columns):
+    st.error("Choose a different CSV column for each name part.")
+    st.stop()
+
+recipients = names_df[selected_name_columns].copy().dropna(how="all")
+for column in selected_name_columns:
+    recipients[column] = recipients[column].fillna("").astype(str).str.strip()
+recipients = recipients[recipients[selected_name_columns].ne("").any(axis=1)]
+recipients["Name"] = recipients[selected_name_columns].agg(" ".join, axis=1).str.replace(r"\s+", " ", regex=True).str.strip()
 if recipients.empty:
     st.error("No usable recipients were found in the selected columns.")
     st.stop()
@@ -501,7 +515,7 @@ with review_right:
         unsafe_allow_html=True,
     )
     with st.expander("Review recipient data"):
-        st.dataframe(recipients[[first_column, last_column, "Name"]], hide_index=True, width="stretch")
+        st.dataframe(recipients[selected_name_columns + ["Name"]], hide_index=True, width="stretch")
 
     if st.button("Generate certificate ZIP", type="primary", width="stretch"):
         output_dir = workspace / "certificates"
@@ -513,7 +527,7 @@ with review_right:
             progress = st.progress(0, text="Preparing certificates…")
             with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as archive:
                 for index, (_, recipient) in enumerate(recipients.iterrows(), start=1):
-                    filename = _safe_filename(recipient[first_column], recipient[last_column], used, extension)
+                    filename = _safe_filename([recipient[column] for column in selected_name_columns], used, extension)
                     certificate_path = output_dir / filename
                     CertificateGenerator.save_certificate(generator.render_certificate(recipient["Name"]), str(certificate_path), extension)
                     archive.write(certificate_path, arcname=filename)

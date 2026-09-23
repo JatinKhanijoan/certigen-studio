@@ -1,18 +1,15 @@
-# CertiGen — modified version
+# CertiGen
 
-This repository is a modified version of the existing CertiGen project. It
-adds a Streamlit editor and a clean-template certificate workflow while
-retaining the original project's package and command-line interfaces.
+CertiGen creates personalized certificates in batches from a certificate
+template and a recipient list. Its Streamlit editor lets you position and style
+recipient names on a clean template, preview the result, and export certificates
+as PNG, JPEG, or PDF files. Python and command-line interfaces are also
+available.
 
-The original project, authorship, and copyright belong to the upstream
-project. This repository does not claim original authorship of CertiGen.
-
-The upstream project metadata and history are retained in this repository.
-
-The Streamlit editor is designed for a clean certificate template: upload the
-artwork without a sample name, place a live recipient name with the selection
-box, review the production render, and download a ZIP of PNG, JPEG, or PDF
-certificates.
+This repository extends the upstream CertiGen project with the Streamlit
+editor and clean-template workflow while retaining its package and
+command-line interfaces. Upstream project metadata, history, and licensing
+are retained; see [Licensing and attribution](#licensing-and-attribution).
 
 ## Features
 
@@ -41,7 +38,9 @@ The launcher uses the project virtual environment. The app entrypoint is
 Upload:
 
 1. A PNG or JPEG certificate template without a sample name.
-2. A CSV with separate first-name and last-name columns.
+2. A CSV with either two columns (first and last name) or three columns
+   (first, middle, and last name). The editor detects the column count and
+   lets you map each name part to its column.
 
 The editor uses the first recipient as the live sample. You can change the
 sample recipient before exporting. The original template pixels are preserved;
